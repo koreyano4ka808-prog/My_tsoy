@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Тренажер: Кого проверит таможня? (РК / ЕАЭС)</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: linear-gradient(145deg, #f0f4fa 0%, #dae5f0 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+      padding: 1.5rem;
+    }
+    .card {
+      max-width: 880px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(6px);
+      border-radius: 2.5rem;
+      box-shadow: 0 20px 40px -12px rgba(0, 20, 40, 0.4), 0 8px 24px -6px rgba(0,0,0,0.1);
+      padding: 2rem 2rem 2.2rem;
+      border: 1px solid rgba(255,255,255,0.5);
+    }
+    h1 {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      font-size: 1.9rem;
+      color: #0a2647;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.2rem;
+      border-bottom: 3px solid #2d6a9f;
+      padding-bottom: 0.7rem;
+    }
+    h1 small {
+      font-size: 1rem;
+      font-weight: 400;
+      color: #2c4c7c;
+      margin-left: auto;
+      background: #e6eef9;
+      padding: 0.2rem 1rem;
+      border-radius: 40px;
+      letter-spacing: 0.3px;
+    }
+    .subhead {
+      color: #1e3e64;
+      font-weight: 450;
+      margin: 0.25rem 0 1.5rem 0;
+      font-size: 1rem;
+      background: #d7e3f0;
+      display: inline-block;
+      padding: 0.2rem 1.2rem;
+      border-radius: 30px;
+    }
+    .situation-box {
+      background: #ffffffd9;
+      border-radius: 1.8rem;
+      padding: 1.8rem 1.8rem 1.2rem;
+      margin: 1.2rem 0 1.8rem 0;
+      box-shadow: inset 0 1px 4px #b0c8dd, 0 8px 18px -8px #0f2b4b1a;
+      border: 1px solid #ffffff;
+    }
+    .situation-text {
+      font-size: 1.5rem;
+      font-weight: 500;
+      line-height: 1.4;
+      color: #001c3d;
+      padding-left: 0.2rem;
+      margin-bottom: 1rem;
+    }
+    .situation-text::before {
+      content: "📋 ";
+      font-size: 1.7rem;
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
+    }
+    .options-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem 1.2rem;
+      margin: 0.8rem 0 0.2rem;
+      justify-content: flex-start;
+    }
+    .option-btn {
+      background: #f2f7ff;
+      border: 1.5px solid #b6cee9;
+      padding: 0.7rem 1.8rem;
+      border-radius: 60px;
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #103457;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      box-shadow: 0 2px 4px rgba(0, 20, 40, 0.04);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: #ecf3fc;
+    }
+    .option-btn:hover {
+      background: #d7e6fd;
+      border-color: #2d6a9f;
+      transform: scale(1.02);
+      box-shadow: 0 6px 12px -6px #1b4b7a40;
+    }
+    .option-btn:active {
+      transform: scale(0.96);
+    }
+    .option-btn.selected-true {
+      background: #1f8b4c;
+      border-color: #0f5a2e;
+      color: white;
+      box-shadow: 0 4px 8px #0a3d1f40;
+    }
+    .option-btn.selected-false {
+      background: #b13e4b;
+      border-color: #7f2a34;
+      color: white;
+      box-shadow: 0 4px 8px #641f2940;
+    }
+    .option-btn.disabled-true, .option-btn.disabled-false {
+      opacity: 0.8;
+      cursor: default;
+      pointer-events: none;
+    }
+    .option-btn.disabled-true {
+      background: #2a9d5a;
+      border-color: #1b6e3b;
+      color: white;
+    }
+    .option-btn.disabled-false {
+      background: #b13e4b;
+      border-color: #7f2a34;
+      color: white;
+    }
+    .feedback-area {
+      margin: 1.6rem 0 1rem;
+      padding: 1.4rem 1.6rem;
+      background: #e7eff9;
+      border-radius: 1.8rem;
+      border-left: 6px solid #1f6390;
+      box-shadow: inset 0 0 0 1px #c7ddf5;
+    }
+    .feedback-area .norm-link {
+      font-weight: 600;
+      color: #004080;
+      background: #d0e1f5;
+      padding: 0.2rem 1rem;
+      border-radius: 30px;
+      display: inline-block;
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+      border: 1px solid #a7c1e0;
+      word-break: break-word;
+    }
+    .feedback-area .explain {
+      font-size: 1rem;
+      line-height: 1.5;
+      color: #022b4f;
+    }
+    .feedback-area .explain strong {
+      color: #00337a;
+    }
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .nav-btn {
+      background: white;
+      border: none;
+      padding: 0.7rem 2rem;
+      border-radius: 60px;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #173e66;
+      box-shadow: 0 2px 8px #b2cce2;
+      border: 1px solid #bed6ef;
+      cursor: pointer;
+      transition: 0.1s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: #f2f9ff;
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: #dbeafe;
+      border-color: #3873b0;
+      transform: scale(1.02);
+      box-shadow: 0 8px 14px -8px #1f4b7a;
+    }
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+      background: #eef3f8;
+    }
+    .nav-btn.primary {
+      background: #1b4d7a;
+      border-color: #0d3557;
+      color: white;
+      box-shadow: 0 4px 10px #1f4b7a60;
+    }
+    .nav-btn.primary:hover:not(:disabled) {
+      background: #0f3d63;
+    }
+    .counter {
+      font-size: 0.95rem;
+      background: #c7daf0;
+      padding: 0.25rem 1.2rem;
+      border-radius: 60px;
+      color: #103457;
+      font-weight: 500;
+    }
+    .footer-notes {
+      margin-top: 1.8rem;
+      font-size: 0.85rem;
+      color: #2b4b70;
+      text-align: center;
+      border-top: 1px solid #bdd1e9;
+      padding-top: 1.2rem;
+      opacity: 0.8;
+    }
+    /* ----- Итоговый экран ----- */
+    .results-screen {
+      display: none;
+      background: #f2f7ff;
+      border-radius: 2rem;
+      padding: 2rem 2rem 1.8rem;
+      margin: 1rem 0;
+      box-shadow: inset 0 0 0 1px #c7ddf5;
+    }
+    .results-screen.active {
+      display: block;
+    }
+    .results-screen h2 {
+      font-size: 1.8rem;
+      color: #0a2647;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .results-screen .score-big {
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: #1b4d7a;
+      background: white;
+      display: inline-block;
+      padding: 0.2rem 2rem;
+      border-radius: 60px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      margin: 0.5rem 0 0.8rem;
+    }
+    .results-screen .level-badge {
+      font-size: 1.3rem;
+      font-weight: 600;
+      padding: 0.4rem 1.8rem;
+      border-radius: 60px;
+      display: inline-block;
+      margin: 0.3rem 0 1rem;
+    }
+    .level-badge.expert { background: #1f8b4c; color: white; }
+    .level-badge.advanced { background: #2d6a9f; color: white; }
+    .level-badge.basic { background: #f59e0b; color: white; }
+    .level-badge.novice { background: #b13e4b; color: white; }
+    .results-screen .detail-list {
+      margin-top: 1.2rem;
+      text-align: left;
+      background: white;
+      border-radius: 1.2rem;
+      padding: 1rem 1.5rem;
+      max-height: 240px;
+      overflow-y: auto;
+      font-size: 0.95rem;
+      border: 1px solid #d7e3f0;
+    }
+    .detail-list .detail-item {
+      padding: 0.4rem 0;
+      border-bottom: 1px solid #eef3f8;
+      display: flex;
+      gap: 0.8rem;
+      align-items: baseline;
+    }
+    .detail-list .detail-item:last-child { border-bottom: none; }
+    .detail-item .d-icon { font-size: 1.2rem; width: 1.8rem; }
+    .detail-item .d-correct { color: #1f8b4c; font-weight: 600; }
+    .detail-item .d-wrong { color: #b13e4b; font-weight: 600; }
+    .results-screen .restart-btn {
+      margin-top: 1.2rem;
+      background: #1b4d7a;
+      color: white;
+      border: none;
+      padding: 0.8rem 2.5rem;
+      border-radius: 60px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.15s ease;
+      box-shadow: 0 4px 12px #1b4d7a60;
+    }
+    .results-screen .restart-btn:hover {
+      background: #0f3d63;
+      transform: scale(1.02);
+    }
+    @media (max-width: 550px) {
+      .card { padding: 1.2rem; }
+      .situation-text { font-size: 1.2rem; }
+      .option-btn { padding: 0.5rem 1.2rem; font-size: 1rem; }
+      .action-row { flex-direction: column; align-items: stretch; }
+      .results-screen .score-big { font-size: 2.5rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="card" id="appContainer">
+  <h1>
+    🛃 Кого проверит таможня?
+    <small>РК / ЕАЭС</small>
+  </h1>
+  <div class="subhead">⚖️ Отметьте всех, кого таможенный орган вправе проверить</div>
+
+  <!-- Основной блок с ситуацией -->
+  <div id="gameBlock">
+    <div class="situation-box" id="situationBox">
+      <div class="situation-text" id="situationText">Импортер оформил декларацию.</div>
+      <div class="options-grid" id="optionsContainer"></div>
+    </div>
+
+    <div class="feedback-area" id="feedbackArea">
+      <div class="explain" id="explainText">Выберите вариант(ы), затем нажмите «Проверить».</div>
+      <div class="norm-link" id="normLink">📜 ссылка на норму появится после проверки</div>
+    </div>
+
+    <div class="action-row">
+      <div>
+        <button class="nav-btn" id="checkBtn">✅ Проверить</button>
+        <button class="nav-btn" id="nextBtn">➡️ Следующая</button>
+      </div>
+      <div>
+        <span class="counter" id="counterDisplay">1 / 7</span>
+        <button class="nav-btn" id="resetBtn">🔄 Сброс</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Блок с результатами -->
+  <div class="results-screen" id="resultsScreen">
+    <h2>🏆 Итоги</h2>
+    <div class="score-big" id="scoreDisplay">0 / 7</div>
+    <div class="level-badge" id="levelBadge">—</div>
+    <div style="font-weight:500; color:#1e3e64; margin-bottom:0.3rem;">📊 Детальный разбор:</div>
+    <div class="detail-list" id="detailList"></div>
+    <button class="restart-btn" id="restartBtn">🔄 Пройти заново</button>
+  </div>
+
+  <div class="footer-notes">✦ Нажмите на вариант, чтобы выбрать/отменить. После проверки ответы фиксируются.</div>
+</div>
+<script>
+  (function() {
+    // ------------------ 7 СИТУАЦИЙ ------------------
+    const scenarios = [
+      {
+        id: 0,
+        situation: 'Импортер оформил декларацию на товары.',
+        correct: ['декларант (импортер)'],
+        options: ['декларант (импортер)', 'перевозчик', 'таможенный брокер', 'уполномоченный экономический оператор'],
+        norm: 'ст. 332, 340 ТК ЕАЭС',
+        explanation: 'Декларант (импортер) — основное лицо, подлежащее таможенной проверке. Таможня вправе проверять правильность заявленных сведений.'
+      },
+      {
+        id: 1,
+        situation: 'Перевозчик доставил импортный груз на склад временного хранения.',
+        correct: ['перевозчик', 'лицо, осуществляющее временное хранение'],
+        options: ['перевозчик', 'лицо, осуществляющее временное хранение', 'декларант', 'таможенный брокер'],
+        norm: 'ст. 331, 333 ТК ЕАЭС',
+        explanation: 'Перевозчик и лицо, ответственное за временное хранение, могут быть проверены (транспортные документы, сроки, сохранность товаров).'
+      },
+      {
+        id: 2,
+        situation: 'Компания купила импортный товар у иностранного поставщика (участие в сделке).',
+        correct: ['покупатель', 'поставщик'],
+        options: ['покупатель', 'поставщик', 'таможенный брокер', 'перевозчик'],
+        norm: 'ст. 339, п.2 ст. 340 ТК ЕАЭС',
+        explanation: 'Таможня проверяет лиц, участвующих в сделке (покупатель, поставщик) — запрос документов о цене, происхождении, условиях поставки.'
+      },
+      {
+        id: 3,
+        situation: 'Уполномоченный экономический оператор (УЭО) оформил поставку с применением упрощений.',
+        correct: ['уполномоченный экономический оператор'],
+        options: ['уполномоченный экономический оператор', 'декларант', 'таможенный брокер', 'перевозчик'],
+        norm: 'ст. 434, 435 ТК ЕАЭС',
+        explanation: 'УЭО подлежит проверке на предмет соблюдения условий присвоения статуса и исполнения обязательств при упрощенном порядке.'
+      },
+      {
+        id: 4,
+        situation: 'Товар помещен под процедуру выпуска для внутреннего потребления, но позже выявлены признаки недостоверного декларирования.',
+        correct: ['декларант', 'лицо, распоряжающееся товарами после выпуска'],
+        options: ['декларант', 'лицо, распоряжающееся товарами после выпуска', 'перевозчик', 'таможенный брокер'],
+        norm: 'ст. 340, 341 ТК ЕАЭС',
+        explanation: 'После выпуска таможня проверяет декларанта, а также лиц, которые распоряжаются товарами (покупатель, владелец).'
+      },
+      {
+        id: 5,
+        situation: 'Товары временно хранятся вне склада временного хранения (на территории получателя).',
+        correct: ['лицо, осуществляющее временное хранение вне склада', 'получатель товаров'],
+        options: ['лицо, осуществляющее временное хранение вне склада', 'получатель товаров', 'перевозчик', 'декларант'],
+        norm: 'ст. 333, 334 ТК ЕАЭС',
+        explanation: 'Лица, обеспечивающие временное хранение вне СВХ, подлежат проверке (условия хранения, учет товаров).'
+      },
+      {
+        id: 6,
+        situation: 'Таможенный брокер подал декларацию от имени импортера.',
+        correct: ['таможенный брокер', 'декларант (импортер)'],
+        options: ['таможенный брокер', 'декларант (импортер)', 'перевозчик', 'уполномоченный экономический оператор'],
+        norm: 'ст. 401, 402 ТК ЕАЭС',
+        explanation: 'Брокер и декларант (импортер) — оба могут быть проверены, т.к. несут солидарную ответственность за достоверность сведений.'
+      }
+    ];
+
+    // ---------- состояние ----------
+    let currentIndex = 0;
+    let selectedMap = new Map();
+    let isAnswered = false;
+    let totalScenarios = scenarios.length;
+
+    // Результаты: для каждого сценария запоминаем, был ли ответ верным
+    let results = new Array(totalScenarios).fill(null); // true/false/null
+
+    const situationText = document.getElementById('situationText');
+    const optionsContainer = document.getElementById('optionsContainer');
+    const explainText = document.getElementById('explainText');
+    const normLink = document.getElementById('normLink');
+    const checkBtn = document.getElementById('checkBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const counterDisplay = document.getElementById('counterDisplay');
+    const gameBlock = document.getElementById('gameBlock');
+    const resultsScreen = document.getElementById('resultsScreen');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const levelBadge = document.getElementById('levelBadge');
+    const detailList = document.getElementById('detailList');
+    const restartBtn = document.getElementById('restartBtn');
+
+    function normalize(text) {
+      return text.trim().toLowerCase().replace(/[\(\)]/g, '').replace(/\s+/g, ' ');
+    }
+
+    function renderScenario(index) {
+      const scenario = scenarios[index];
+      if (!scenario) return;
+      situationText.textContent = scenario.situation;
+      optionsContainer.innerHTML = '';
+      selectedMap.clear();
+      isAnswered = false;
+
+      scenario.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = opt;
+        btn.dataset.value = opt;
+        btn.addEventListener('click', function(e) {
+          if (isAnswered) return;
+          const optKey = this.dataset.value;
+          if (selectedMap.has(optKey)) {
+            selectedMap.delete(optKey);
+            this.classList.remove('selected-true');
+          } else {
+            selectedMap.set(optKey, true);
+            this.classList.add('selected-true');
+          }
+          explainText.innerHTML = 'Выберите вариант(ы), затем нажмите «Проверить».';
+          normLink.innerHTML = '📜 ссылка на норму появится после проверки';
+          document.querySelectorAll('.option-btn').forEach(b => {
+            b.classList.remove('disabled-true', 'disabled-false', 'selected-false');
+            b.style.outline = 'none';
+          });
+        });
+        optionsContainer.appendChild(btn);
+      });
+
+      explainText.innerHTML = 'Выберите вариант(ы), затем нажмите «Проверить».';
+      normLink.innerHTML = '📜 ссылка на норму появится после проверки';
+      counterDisplay.textContent = `${index+1} / ${totalScenarios}`;
+
+      document.querySelectorAll('.option-btn').forEach(b => {
+        b.classList.remove('selected-true', 'selected-false', 'disabled-true', 'disabled-false');
+        b.style.outline = 'none';
+        b.style.pointerEvents = 'auto';
+      });
+      selectedMap.clear();
+      isAnswered = false;
+    }
+
+    function handleCheck() {
+      if (isAnswered) {
+        explainText.innerHTML = '⏳ Ответ уже зафиксирован. Перейдите к следующей ситуации или нажмите «Сброс».';
+        return;
+      }
+      const scenario = scenarios[currentIndex];
+      const correctSet = new Set(scenario.correct.map(normalize));
+      const selectedOptions = Array.from(selectedMap.keys());
+      const selectedNorm = selectedOptions.map(normalize);
+      
+      const allCorrectSelected = correctSet.size === selectedNorm.length && selectedNorm.every(v => correctSet.has(v));
+      const allSelectedAreCorrect = selectedNorm.every(v => correctSet.has(v));
+      const isFullyCorrect = allCorrectSelected && allSelectedAreCorrect && selectedNorm.length === correctSet.size;
+
+      // Сохраняем результат
+      results[currentIndex] = isFullyCorrect;
+
+      const optionBtns = document.querySelectorAll('.option-btn');
+      optionBtns.forEach(btn => {
+        const val = btn.dataset.value;
+        const normVal = normalize(val);
+        const isSelected = selectedMap.has(val);
+        btn.classList.remove('selected-true', 'selected-false');
+        if (isSelected) {
+          if (correctSet.has(normVal)) {
+            btn.classList.add('selected-true', 'disabled-true');
+          } else {
+            btn.classList.add('selected-false', 'disabled-false');
+          }
+        } else {
+          if (correctSet.has(normVal)) {
+            btn.style.outline = '2px dashed #1f8b4c';
+            btn.style.outlineOffset = '2px';
+          } else {
+            btn.style.outline = 'none';
+          }
+        }
+        btn.style.pointerEvents = 'none';
+      });
+
+      let feedbackMsg = '';
+      if (isFullyCorrect) {
+        feedbackMsg = '✅ Верно! Вы выбрали всех, кого таможня вправе проверить.';
+      } else {
+        const missing = Array.from(correctSet).filter(c => !selectedNorm.includes(c));
+        const extra = selectedNorm.filter(s => !correctSet.has(s));
+        let parts = [];
+        if (missing.length) parts.push(`❌ не выбраны: ${missing.join(', ')}`);
+        if (extra.length) parts.push(`⚠️ лишние: ${extra.join(', ')}`);
+        feedbackMsg = `❌ Не полностью. ${parts.join('; ')}.`;
+      }
+      explainText.innerHTML = `<strong>${feedbackMsg}</strong><br> ${scenario.explanation}`;
+      normLink.innerHTML = `📜 Норма: ${scenario.norm}`;
+      isAnswered = true;
+
+      // Если это последний сценарий — показываем кнопку "Итоги"
+      if (currentIndex === totalScenarios - 1) {
+        nextBtn.textContent = '📊 Итоги';
+      } else {
+        nextBtn.textContent = '➡️ Следующая';
+      }
+    }
+
+    function goToNext() {
+      if (!isAnswered) {
+        if (!confirm('Вы ещё не проверили ответ. Перейти без проверки?')) {
+          return;
+        }
+        // Если пропустили — отмечаем как неправильный
+        if (results[currentIndex] === null) {
+          results[currentIndex] = false;
+        }
+      }
+
+      // Если это был последний сценарий — показываем итоги
+      if (currentIndex === totalScenarios - 1) {
+        showResults();
+        return;
+      }
+
+      currentIndex++;
+      renderScenario(currentIndex);
+      // Сбрасываем текст кнопки
+      nextBtn.textContent = '➡️ Следующая';
+    }
+
+    function showResults() {
+      gameBlock.style.display = 'none';
+      resultsScreen.classList.add('active');
+
+      const correctCount = results.filter(r => r === true).length;
+      scoreDisplay.textContent = `${correctCount} / ${totalScenarios}`;
+
+      // Уровень знаний
+      let level, levelClass;
+      const pct = correctCount / totalScenarios;
+      if (pct === 1) { level = '🏅 Эксперт'; levelClass = 'expert'; }
+      else if (pct >= 0.8) { level = '🌟 Продвинутый'; levelClass = 'advanced'; }
+      else if (pct >= 0.5) { level = '📖 Базовый'; levelClass = 'basic'; }
+      else { level = '📚 Новичок (рекомендуем повторить)'; levelClass = 'novice'; }
+      levelBadge.textContent = level;
+      levelBadge.className = 'level-badge ' + levelClass;
+
+      // Детальный список
+      detailList.innerHTML = '';
+      scenarios.forEach((s, i) => {
+        const div = document.createElement('div');
+        div.className = 'detail-item';
+        const icon = results[i] === true ? '✅' : results[i] === false ? '❌' : '⏳';
+        const statusText = results[i] === true ? 'Верно' : results[i] === false ? 'Ошибка' : 'Пропущено';
+        const statusClass = results[i] === true ? 'd-correct' : 'd-wrong';
+        div.innerHTML = `
+          <span class="d-icon">${icon}</span>
+          <span style="flex:1;">${s.situation}</span>
+          <span class="${statusClass}">${statusText}</span>
+        `;
+        detailList.appendChild(div);
+      });
+    }
+
+    function resetAll() {
+      // Сброс состояния
+      currentIndex = 0;
+      results = new Array(totalScenarios).fill(null);
+      gameBlock.style.display = 'block';
+      resultsScreen.classList.remove('active');
+      renderScenario(0);
+      explainText.innerHTML = 'Выберите вариант(ы), затем нажмите «Проверить».';
+      normLink.innerHTML = '📜 ссылка на норму появится после проверки';
+      nextBtn.textContent = '➡️ Следующая';
+    }
+
+    // --- Инициализация ---
+    renderScenario(0);
+    checkBtn.addEventListener('click', handleCheck);
+    nextBtn.addEventListener('click', goToNext);
+    resetBtn.addEventListener('click', resetAll);
+    restartBtn.addEventListener('click', resetAll);
+  })();
+</script>
+</body>
+</html>
