@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Маршрут товара — интерактивный тренажёр</title>
+<style>
+  :root{
+    --bg:#0f1720;
+    --panel:#16212c;
+    --panel-2:#1c2a37;
+    --border:#2a3a49;
+    --text:#e7edf2;
+    --muted:#8fa3b3;
+    --accent:#3aa6ff;
+    --ok:#2fbf71;
+    --ok-bg:#12291f;
+    --bad:#ff5a5f;
+    --bad-bg:#2c1518;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI', Tahoma, Verdana, Arial, sans-serif;
+    background:linear-gradient(160deg,#0f1720,#111e29 60%,#0f1720);
+    color:var(--text);
+    padding:32px 16px 60px;
+    line-height:1.55;
+  }
+  .wrap{max-width:840px;margin:0 auto;}
+  header{text-align:center;margin-bottom:26px;}
+  header h1{
+    font-size:28px;margin:0 0 8px;
+    background:linear-gradient(90deg,#3aa6ff,#7fd8ff);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  header p{color:var(--muted);margin:0;font-size:15px;}
+
+  .step{display:none;}
+  .step.active{display:block;}
+
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media (max-width:640px){.cards{grid-template-columns:1fr;}}
+
+  .route-card{
+    background:var(--panel);
+    border:2px solid var(--border);
+    border-radius:var(--radius);
+    padding:22px 20px;
+    cursor:pointer;
+    transition:border-color .15s, transform .1s;
+    text-align:center;
+  }
+  .route-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+  .route-flow{
+    font-size:16px;font-weight:700;margin-bottom:10px;
+    display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;
+  }
+  .route-flow span.country{background:var(--panel-2);padding:5px 10px;border-radius:8px;}
+  .route-flow .arrow{color:var(--accent);}
+  .route-card p{color:var(--muted);font-size:13.5px;margin:0;}
+
+  .case{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:18px 20px;margin-bottom:22px;
+  }
+  .case h2{margin:0 0 10px;font-size:17px;}
+  .case p{margin:0;color:var(--muted);font-size:14.5px;}
+  .case b{color:var(--text);}
+
+  .qblock{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:18px 20px;margin-bottom:16px;
+  }
+  .qblock h3{margin:0 0 12px;font-size:15.5px;}
+  .qnum{color:var(--accent);font-weight:700;margin-right:6px;}
+
+  .opt{
+    display:flex;align-items:flex-start;gap:10px;
+    padding:10px 12px;border-radius:10px;margin-bottom:8px;
+    cursor:pointer;border:1px solid var(--border);
+    transition:border-color .15s, background .15s;
+  }
+  .opt:hover{border-color:var(--accent);}
+  .opt.selected{background:var(--panel-2);border-color:var(--accent);}
+  .opt input{margin-top:3px;flex-shrink:0;accent-color:var(--accent);}
+  .opt .otext{font-size:14.5px;}
+
+  .result-box{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14px;}
+  .result-box.show{display:block;}
+  .result-box.correct{background:var(--ok-bg);border:1px solid var(--ok);color:#bdf5d3;}
+  .result-box.incorrect{background:var(--bad-bg);border:1px solid var(--bad);color:#ffd0d1;}
+
+  .actions{display:flex;gap:12px;justify-content:center;margin-top:22px;flex-wrap:wrap;}
+  button{
+    font-family:inherit;font-size:15px;font-weight:600;padding:12px 28px;
+    border-radius:10px;border:none;cursor:pointer;transition:transform .1s, opacity .1s;
+  }
+  button:active{transform:scale(0.97);}
+  button:disabled{opacity:.4;cursor:not-allowed;}
+  .btn-primary{background:var(--accent);color:#08202f;}
+  .btn-primary:hover:not(:disabled){opacity:.92;}
+  .btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border);}
+  .btn-ghost:hover{border-color:var(--accent);}
+
+  .breakdown{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:20px 22px;margin-top:10px;
+  }
+  .breakdown h2{margin:0 0 14px;font-size:19px;color:var(--accent);}
+  .breakdown h3{margin:18px 0 8px;font-size:15.5px;}
+  .breakdown p, .breakdown li{color:var(--text);font-size:14.5px;}
+  .breakdown ul{margin:0;padding-left:20px;color:var(--muted);}
+  .breakdown li{margin-bottom:6px;}
+  .law{color:var(--muted);font-size:13px;font-style:italic;margin-top:4px;}
+  .score-line{
+    text-align:center;font-size:16px;margin-bottom:16px;
+    padding:10px;border-radius:10px;background:var(--panel-2);
+  }
+  .score-line b{color:var(--accent);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Маршрут товара</h1>
+    <p>Определите судьбу товара на границе ЕАЭС и в Республике Казахстан</p>
+  </header>
+
+  <!-- STEP 1: выбор маршрута -->
+  <div class="step active" id="step1">
+    <div class="qblock">
+      <h3>Выберите карточку сделки</h3>
+      <div class="cards">
+        <div class="route-card" data-route="A">
+          <div class="route-flow">
+            <span class="country">Китай</span><span class="arrow">→</span>
+            <span class="country">Казахстан</span><span class="arrow">→</span>
+            <span class="country">Россия</span>
+          </div>
+          <p>Товар произведён в третьей стране (Китай), ввозится в РК, затем планируется его продажа в Россию.</p>
+        </div>
+        <div class="route-card" data-route="B">
+          <div class="route-flow">
+            <span class="country">Германия</span><span class="arrow">→</span>
+            <span class="country">Казахстан</span><span class="arrow">→</span>
+            <span class="country">Кыргызстан</span>
+          </div>
+          <p>Товар произведён в третьей стране (Германия, ЕС), ввозится в РК, затем планируется его продажа в Кыргызстан.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: вопросы -->
+  <div class="step" id="step2">
+    <div class="case" id="caseBox"></div>
+    <div id="questions"></div>
+    <div class="actions">
+      <button class="btn-primary" id="checkBtn" disabled>Показать разбор маршрута</button>
+      <button class="btn-ghost" id="backBtn">Выбрать другой маршрут</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: разбор -->
+  <div class="step" id="step3">
+    <div class="score-line" id="scoreLine"></div>
+    <div class="breakdown" id="breakdownBox"></div>
+    <div class="actions">
+      <button class="btn-ghost" id="restartBtn">Начать заново</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const ROUTES = {
+  A: {
+    from: "Китай", to: "Россия",
+    fromNote: "третья страна (не входит в ЕАЭС)",
+    toNote: "государство-член ЕАЭС",
+  },
+  B: {
+    from: "Германия", to: "Кыргызстан",
+    fromNote: "третья страна, член ЕС (не входит в ЕАЭС)",
+    toNote: "государство-член ЕАЭС",
+  }
+};
+
+// Вопросы одинаковы по структуре для обоих маршрутов, различается только текст с названиями стран.
+function buildQuestions(route) {
+  const r = ROUTES[route];
+  return [
+    {
+      type: "single",
+      text: `Прежде чем везти товар из ${r.from} через Казахстан в ${r.to}, что нужно проверить в первую очередь?`,
+      options: [
+        { text: "Код ТН ВЭД ЕАЭС товара — не входит ли он в Перечень изъятий, применяемый Казахстаном по обязательствам ВТО", correct: true },
+        { text: "Ничего проверять не нужно — внутри ЕАЭС товары перемещаются свободно в любом случае", correct: false },
+        { text: "Только то, подакцизный ли товар", correct: false }
+      ],
+      explanation: `Перечень изъятий — это решение Совета ЕЭК о товарах, по которым Казахстан в рамках обязательств при вступлении в ВТО применяет ставки ввозных пошлин ниже, чем Единый таможенный тариф (ЕТТ) ЕАЭС. Если код ТН ВЭД товара входит в этот перечень, дальнейшая судьба груза в ${r.to} прямо зависит от того, по какой ставке он был ввезён в РК.`
+    },
+    {
+      type: "single",
+      text: `Товар входит в Перечень изъятий и был ввезён в Казахстан по пониженной ставке ВТО. Можно ли сразу вывезти его в ${r.to}?`,
+      options: [
+        { text: "Да, свободно — это же единое таможенное пространство ЕАЭС", correct: false },
+        { text: "Нет: без уплаты разницы между ставкой ЕТТ ЕАЭС и ставкой ВТО либо без переоформления ввоза по полной ставке ЕТТ вывоз в другие страны ЕАЭС запрещён", correct: true },
+        { text: "Можно, если получить только сертификат происхождения товара", correct: false }
+      ],
+      explanation: `Казахстан обязался не допускать вывоза в другие государства-члены ЕАЭС товаров из Перечня изъятий, ввезённых по пониженным ставкам ВТО. Есть два законных пути дальше: ввозить сразу по полной ставке ЕТТ ЕАЭС (тогда вывоз свободен) — или доплатить разницу между ЕТТ и ставкой ВТО, если товар изначально ввезён по льготной ставке.`
+    },
+    {
+      type: "multi",
+      text: `Какие документы реально потребуются на этом маршруте (${r.from} → Казахстан → ${r.to})?`,
+      options: [
+        { text: "Таможенная декларация на товары (ДТ) при ввозе в РК из третьей страны", correct: true },
+        { text: "Электронный счёт-фактура (ЭСФ)", correct: true },
+        { text: "Сопроводительная накладная на товары (СНТ)", correct: true },
+        { text: "Сертификат происхождения товара — если товар из Перечня изъятий и планируется его дальнейший вывоз в другое государство ЕАЭС", correct: true },
+        { text: "Отдельная экспортная лицензия — требуется всегда при вывозе в любую страну ЕАЭС", correct: false }
+      ],
+      explanation: `Ввоз из третьей страны в РК оформляется таможенной декларацией. Дальнейшее перемещение внутри ЕАЭС сопровождается ЭСФ и СНТ — это стандартный механизм прослеживаемости товаров в Союзе. Если товар входит в Перечень изъятий и произведён либо помещён под соответствующий режим в РК, при вывозе в другое государство ЕАЭС он должен сопровождаться заверенными документами, подтверждающими происхождение и уплаченные пошлины. Отдельная экспортная лицензия для обычного коммерческого товара не требуется — лицензирование касается только специальных категорий (товары двойного назначения, отдельные подакцизные и стратегические позиции).`
+    },
+    {
+      type: "single",
+      text: "Какое ограничение действует на протяжении всего маршрута, если товар входит в Перечень изъятий?",
+      options: [
+        { text: "Запрет вывоза в другие государства ЕАЭС товаров, ввезённых в РК по пониженным ставкам ВТО, без уплаты разницы пошлин или без ввоза по ставке ЕТТ ЕАЭС", correct: true },
+        { text: "Полный и безусловный запрет любого дальнейшего перемещения товара за пределы Казахстана", correct: false },
+        { text: "Ограничений нет — Перечень изъятий касается только статистики, а не таможенного оформления", correct: false }
+      ],
+      explanation: "Ограничение не абсолютное: товар не заперт в Казахстане навсегда, но его дальнейшее движение в другие страны ЕАЭС обусловлено либо доплатой разницы пошлин, либо изначальным выбором ставки ЕТТ ЕАЭС при ввозе. Это ограничение по обороту, а не запрет как таковой."
+    }
+  ];
+}
+
+let currentRoute = null;
+let questions = [];
+let userAnswers = [];
+
+const step1 = document.getElementById('step1');
+const step2 = document.getElementById('step2');
+const step3 = document.getElementById('step3');
+
+document.querySelectorAll('.route-card').forEach(card => {
+  card.addEventListener('click', () => {
+    currentRoute = card.dataset.route;
+    startStep2();
+  });
+});
+
+function startStep2() {
+  const r = ROUTES[currentRoute];
+  document.getElementById('caseBox').innerHTML = `
+    <h2>Условие</h2>
+    <p>Товар произведён в <b>${r.from}</b> (${r.fromNote}). Он ввозится на территорию <b>Республики Казахстан</b>,
+    а затем планируется его дальнейшая продажа в <b>${r.to}</b> (${r.toNote}). Ответьте на вопросы ниже, чтобы определить,
+    как правильно организовать этот маршрут.</p>
+  `;
+
+  questions = buildQuestions(currentRoute);
+  userAnswers = questions.map(q => q.type === 'multi' ? [] : null);
+
+  const qEl = document.getElementById('questions');
+  qEl.innerHTML = '';
+  questions.forEach((q, qi) => {
+    const block = document.createElement('div');
+    block.className = 'qblock';
+    let optsHtml = q.options.map((o, oi) => `
+      <label class="opt" data-qi="${qi}" data-oi="${oi}">
+        <input type="${q.type === 'multi' ? 'checkbox' : 'radio'}" name="q${qi}">
+        <span class="otext">${o.text}</span>
+      </label>
+    `).join('');
+    block.innerHTML = `
+      <h3><span class="qnum">${qi+1}.</span>${q.text}</h3>
+      ${optsHtml}
+    `;
+    qEl.appendChild(block);
+  });
+
+  qEl.querySelectorAll('.opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      const qi = parseInt(opt.dataset.qi);
+      const oi = parseInt(opt.dataset.oi);
+      const q = questions[qi];
+      if (q.type === 'single') {
+        qEl.querySelectorAll(`.opt[data-qi="${qi}"]`).forEach(o => {
+          o.classList.remove('selected');
+          o.querySelector('input').checked = false;
+        });
+        opt.classList.add('selected');
+        opt.querySelector('input').checked = true;
+        userAnswers[qi] = oi;
+      } else {
+        opt.classList.toggle('selected');
+        const checked = opt.querySelector('input');
+        checked.checked = !checked.checked;
+        if (checked.checked) {
+          if (!userAnswers[qi].includes(oi)) userAnswers[qi].push(oi);
+        } else {
+          userAnswers[qi] = userAnswers[qi].filter(x => x !== oi);
+        }
+      }
+      checkAllAnswered();
+    });
+  });
+
+  step1.classList.remove('active');
+  step2.classList.add('active');
+  step3.classList.remove('active');
+  document.getElementById('checkBtn').disabled = true;
+}
+
+function checkAllAnswered() {
+  const allAnswered = userAnswers.every(a => Array.isArray(a) ? a.length > 0 : a !== null);
+  document.getElementById('checkBtn').disabled = !allAnswered;
+}
+
+document.getElementById('backBtn').addEventListener('click', () => {
+  step2.classList.remove('active');
+  step1.classList.add('active');
+});
+
+document.getElementById('checkBtn').addEventListener('click', () => {
+  let correctCount = 0;
+  questions.forEach((q, qi) => {
+    if (q.type === 'single') {
+      if (q.options[userAnswers[qi]].correct) correctCount++;
+    } else {
+      const correctSet = q.options.map((o,i)=>o.correct?i:null).filter(i=>i!==null).sort();
+      const userSet = [...userAnswers[qi]].sort();
+      if (JSON.stringify(correctSet) === JSON.stringify(userSet)) correctCount++;
+    }
+  });
+
+  const r = ROUTES[currentRoute];
+  document.getElementById('scoreLine').innerHTML = `Правильных ответов: <b>${correctCount} из ${questions.length}</b>`;
+
+  const bb = document.getElementById('breakdownBox');
+  bb.innerHTML = `
+    <h2>Полный разбор маршрута: ${r.from} → Казахстан → ${r.to}</h2>
+
+    <h3>1. Применяется ли Перечень изъятий</h3>
+    <p>Да, проверка обязательна для любого товара, который ввозится в Казахстан из третьей страны (${r.from})
+    и далее должен переместиться в другое государство-член ЕАЭС (${r.to}). Определяется это по коду ТН ВЭД ЕАЭС
+    товарной позиции.</p>
+    <div class="law">Решение Совета ЕЭК «О перечне товаров, в отношении которых Республикой Казахстан в соответствии
+    с обязательствами при присоединении к ВТО применяются ставки ввозных таможенных пошлин ниже ставок Единого
+    таможенного тарифа ЕАЭС».</div>
+
+    <h3>2. Возможен ли дальнейший экспорт в ${r.to}</h3>
+    <p>Возможен, но зависит от того, по какой ставке товар ввозился в РК:</p>
+    <ul>
+      <li>Если товар <b>не входит</b> в Перечень изъятий — после выпуска в свободное обращение в РК (уплата пошлины
+      по ЕТТ ЕАЭС, НДС) товар приобретает статус товара Союза и свободно перемещается в ${r.to}.</li>
+      <li>Если товар <b>входит</b> в Перечень изъятий и ввезён по пониженной ставке ВТО — вывоз в ${r.to}
+      без дополнительных действий запрещён.</li>
+      <li>Тот же товар из Перечня изъятий можно вывезти в ${r.to}, если он изначально ввезён в РК по полной ставке
+      ЕТТ ЕАЭС, либо если позже доплачена разница между ставкой ЕТТ и ставкой ВТО.</li>
+    </ul>
+
+    <h3>3. Какие документы потребуются</h3>
+    <ul>
+      <li>Таможенная декларация на товары (ДТ) — при ввозе из ${r.from} на территорию РК.</li>
+      <li>Электронный счёт-фактура (ЭСФ) и сопроводительная накладная на товары (СНТ) — при дальнейшем перемещении
+      товара из РК в ${r.to}, для целей прослеживаемости товаров в ЕАЭС.</li>
+      <li>Документы, подтверждающие происхождение товара и уплаченные пошлины — если товар входит в Перечень изъятий
+      и вывозится в другое государство ЕАЭС.</li>
+      <li>Отдельная экспортная лицензия обычному коммерческому товару не требуется — лицензирование затрагивает
+      только специальные категории (товары двойного назначения, отдельные стратегические и подакцизные позиции).</li>
+    </ul>
+
+    <h3>4. Какие ограничения действуют</h3>
+    <p>Главное ограничение — запрет вывоза в другие государства ЕАЭС товаров из Перечня изъятий, ввезённых в РК
+    по пониженным ставкам ВТО, без уплаты разницы пошлин или без переоформления ввоза по ставке ЕТТ ЕАЭС.
+    Это ограничение оборота, а не полный запрет: у товара всегда остаётся законный путь дальнейшего перемещения —
+    через доплату или изначальный выбор полной ставки.</p>
+  `;
+
+  step2.classList.remove('active');
+  step3.classList.add('active');
+});
+
+document.getElementById('restartBtn').addEventListener('click', () => location.reload());
+</script>
+
+</body>
+</html>
