@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ЭСФ на товары · интерактивная презентация</title>
+  <!-- Font Awesome (иконки) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: #eef2f7;
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+      padding: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .presentation-wrapper {
+      max-width: 1300px;
+      width: 100%;
+      background: white;
+      border-radius: 32px;
+      box-shadow: 0 20px 40px -12px rgba(0,0,0,0.25);
+      overflow: hidden;
+      padding: 24px 28px 32px;
+      transition: 0.2s;
+    }
+    /* заголовок */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+      border-bottom: 2px solid #dce3ec;
+      padding-bottom: 12px;
+    }
+    .header h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: #0b2b4a;
+      letter-spacing: -0.3px;
+    }
+    .header h1 i {
+      color: #2a6b9e;
+      margin-right: 10px;
+    }
+    .badge {
+      background: #e6edf6;
+      padding: 8px 18px;
+      border-radius: 40px;
+      color: #1a4975;
+      font-weight: 500;
+      font-size: 0.9rem;
+      border: 1px solid #cbd8e8;
+    }
+    .badge i {
+      margin-right: 8px;
+      color: #1f6b3b;
+    }
+    /* навигация по разделам (кнопки) */
+    .section-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 10px;
+      margin: 18px 0 22px;
+      padding: 6px 0;
+    }
+    .nav-btn {
+      background: transparent;
+      border: 1px solid #c0d0e2;
+      padding: 8px 16px;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #1f3d5a;
+      cursor: pointer;
+      transition: 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #f8fafd;
+    }
+    .nav-btn i {
+      color: #3c6e9c;
+      font-size: 0.9rem;
+    }
+    .nav-btn.active {
+      background: #1a3a5e;
+      border-color: #1a3a5e;
+      color: white;
+      box-shadow: 0 4px 8px rgba(0,40,80,0.15);
+    }
+    .nav-btn.active i {
+      color: white;
+    }
+    .nav-btn:hover:not(.active) {
+      background: #e3ebf5;
+      border-color: #8aa3c0;
+    }
+    .action-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+      background: #f2f6fc;
+      padding: 12px 18px;
+      border-radius: 60px;
+      margin-bottom: 24px;
+      align-items: center;
+      border: 1px solid #d6e1ed;
+    }
+    .action-btn {
+      background: white;
+      border: 1px solid #b8cbdf;
+      padding: 6px 18px;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #1c3b5b;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: 0.1s;
+      cursor: default;
+    }
+    .action-btn i {
+      color: #31658b;
+    }
+    .action-btn.primary {
+      background: #1b4f7a;
+      border-color: #1b4f7a;
+      color: white;
+    }
+    .action-btn.primary i {
+      color: white;
+    }
+    .action-btn.outline {
+      background: transparent;
+    }
+    /* карточка контента */
+    .slide-container {
+      background: #ffffff;
+      border-radius: 24px;
+      border: 1px solid #e2eaf3;
+      padding: 20px 24px 24px;
+      box-shadow: 0 6px 14px rgba(0, 20, 40, 0.04);
+      margin-bottom: 8px;
+    }
+    .slide-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #0b2a47;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .slide-title i {
+      color: #2b6b9b;
+      font-size: 1.5rem;
+    }
+    .grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px 30px;
+    }
+    .field-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      border-bottom: 1px dashed #dde6f0;
+      padding: 8px 0;
+    }
+    .field-label {
+      width: 180px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #2b4b6b;
+    }
+    .field-value {
+      font-weight: 500;
+      color: #0b1e30;
+      background: #f4f8fe;
+      padding: 2px 14px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      word-break: break-word;
+    }
+    .field-value.empty {
+      color: #8196af;
+      font-weight: 400;
+      background: #f2f6fb;
+      min-width: 80px;
+    }
+    .field-value i {
+      margin-right: 6px;
+      color: #6f8aa8;
+    }
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 22px;
+      margin: 6px 0 12px;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.9rem;
+    }
+    .checkbox-item input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
+      accent-color: #1a5a8a;
+    }
+    .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    th {
+      background: #eaf1fa;
+      color: #193856;
+      font-weight: 600;
+      padding: 10px 12px;
+      text-align: left;
+      border: 1px solid #cbdae8;
+    }
+    td {
+      padding: 10px 12px;
+      border: 1px solid #d6e1ed;
+      background: white;
+    }
+    .total-row {
+      font-weight: 600;
+      background: #f3f8ff;
+      border-top: 2px solid #a0bbd4;
+    }
+    .note-meta {
+      color: #2b5d7a;
+      background: #e9f0f9;
+      padding: 6px 16px;
+      border-radius: 40px;
+      font-size: 0.8rem;
+      display: inline-block;
+      margin: 6px 0;
+    }
+    .flex-between {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .mt-2 { margin-top: 14px; }
+    .mb-1 { margin-bottom: 8px; }
+    .section-hidden {
+      display: none;
+    }
+    .pill {
+      background: #e2ebf5;
+      border-radius: 40px;
+      padding: 2px 14px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #1b3e5e;
+    }
+    /* адаптив */
+    @media (max-width: 800px) {
+      .grid-2col { grid-template-columns: 1fr; }
+      .header h1 { font-size: 1.4rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="presentation-wrapper">
+  <!-- шапка -->
+  <div class="header">
+    <h1><i class="fas fa-file-invoice"></i> Электронная сопроводительная накладная</h1>
+    <span class="badge"><i class="fas fa-check-circle"></i> Проведен</span>
+  </div>
+
+  <!-- панель действий -->
+  <div class="action-bar">
+    <span class="action-btn"><i class="fas fa-pen"></i> Записать</span>
+    <span class="action-btn primary"><i class="fas fa-check"></i> Провести</span>
+    <span class="action-btn"><i class="fas fa-edit"></i> Заполнение...</span>
+    <span class="action-btn"><i class="fas fa-paper-plane"></i> Отправить</span>
+    <span class="action-btn"><i class="fas fa-chart-bar"></i> Отчеты...</span>
+    <span class="action-btn"><i class="fas fa-search"></i> Проверить</span>
+    <span class="action-btn"><i class="fas fa-book"></i> Отражение в учете</span>
+    <span class="action-btn"><i class="fas fa-sync-alt"></i> Перезаполнить</span>
+    <span class="action-btn"><i class="fas fa-file-signature"></i> Создать ЭСФ и С</span>
+  </div>
+
+  <!-- навигация по разделам -->
+  <div class="section-nav">
+    <button class="nav-btn active" data-section="general"><i class="fas fa-list-ul"></i> А. Общий</button>
+    <button class="nav-btn" data-section="supplier"><i class="fas fa-truck"></i> В. Поставщик</button>
+    <button class="nav-btn" data-section="receiver"><i class="fas fa-warehouse"></i> С. Получатель</button>
+    <button class="nav-btn" data-section="shipper"><i class="fas fa-boxes"></i> D. Грузоотправитель</button>
+    <button class="nav-btn" data-section="transport"><i class="fas fa-shipping-fast"></i> Е. Перевозка</button>
+    <button class="nav-btn" data-section="contract"><i class="fas fa-file-contract"></i> F. Договор</button>
+    <button class="nav-btn" data-section="goods"><i class="fas fa-cubes"></i> G. Товары</button>
+    <button class="nav-btn" data-section="cargo"><i class="fas fa-weight-hanging"></i> К. Данные о грузе</button>
+    <button class="nav-btn" data-section="other"><i class="fas fa-ellipsis-h"></i> Прочее</button>
+  </div>
+
+  <!-- контейнер для слайдов -->
+  <div class="slide-container" id="slideContainer">
+    <!-- Раздел A (Общий) – видим по умолчанию -->
+    <div id="section-general" class="slide-content">
+      <div class="slide-title"><i class="fas fa-clipboard-list"></i> Раздел А. Общий раздел</div>
+      <div class="grid-2col">
+        <div><span class="field-label">Тип СНТ:</span><span class="field-value">Первичная</span></div>
+        <div><span class="field-label">Номер:</span><span class="field-value">00НФ-И-00000000000000000000000086</span></div>
+        <div><span class="field-label">Номер СНТ уч. системы:</span><span class="field-value">86</span></div>
+        <div><span class="field-label">Дата оформления:</span><span class="field-value">14.09.2026 00:00</span></div>
+        <div><span class="field-label">Предоставлен в бумажном виде:</span><span class="field-value"><i class="far fa-square"></i></span></div>
+        <div><span class="field-label">Дата отгрузки:</span><span class="field-value">14.09.2026</span></div>
+        <div><span class="field-label">Рег. номер в ИС ЭСФ:</span><span class="field-value empty"><i class="far fa-file"></i> не указан</span></div>
+        <div><span class="field-label">Дата и время рег.:</span><span class="field-value empty"><i class="far fa-clock"></i> не указано</span></div>
+        <div><span class="field-label">Номер Акта/Уведомления:</span><span class="field-value empty">—</span></div>
+        <div><span class="field-label">Дата Акта/Уведомления:</span><span class="field-value empty">—</span></div>
+      </div>
+      <div class="mt-2">
+        <div class="field-label">Вид операции:</div>
+        <div class="checkbox-group">
+          <label class="checkbox-item"><input type="checkbox"> Вывоз товаров с территории РК</label>
+          <label class="checkbox-item"><input type="checkbox"> Вывоз товаров с территории РК</label>
+        </div>
+      </div>
+      <div class="mt-2">
+        <span class="field-label">Подакцизные товары (кроме цифровой маркировки)</span>
+        <div class="checkbox-group">
+          <label class="checkbox-item"><input type="checkbox"> Этиловый спирт</label>
+          <label class="checkbox-item"><input type="checkbox"> Алкоголь (кроме пива)</label>
+          <label class="checkbox-item"><input type="checkbox"> Табачные изделия</label>
+          <label class="checkbox-item"><input type="checkbox"> Виноматериал</label>
+          <label class="checkbox-item"><input type="checkbox"> Нефтепродукты</label>
+          <label class="checkbox-item"><input type="checkbox"> Пиво и пивные напитки</label>
+          <label class="checkbox-item"><input type="checkbox"> Биотопливо</label>
+          <label class="checkbox-item"><input type="checkbox"> Товары, подлежащие экспортному контролю</label>
+        </div>
+        <div class="checkbox-group mt-2">
+          <label class="checkbox-item"><input type="checkbox"> <strong>Цифровая маркировка:</strong> Данные по товарам, подлежащим маркировке</label>
+        </div>
+        <div class="note-meta"><i class="fas fa-info-circle"></i> ЭСФ отсутствует</div>
+      </div>
+    </div>
+
+    <!-- Раздел B (Поставщик) -->
+    <div id="section-supplier" class="slide-content section-hidden">
+      <div class="slide-title"><i class="fas fa-user-tie"></i> Раздел В. Реквизиты поставщика</div>
+      <div class="grid-2col">
+        <div><span class="field-label">Поставщик:</span><span class="field-value">ТОО «ТехноСнаб»</span></div>
+        <div><span class="field-label">Структурное подразделение:</span><span class="field-value">—</span></div>
+        <div><span class="field-label">ИИН/БИН:</span><span class="field-value">123456789012</span></div>
+        <div><span class="field-label">Нерезидент:</span><span class="field-value empty">нет</span></div>
+        <div><span class="field-label">Наименование поставщика/отправителя:</span><span class="field-value">ТОО «ТехноСнаб»</span></div>
+        <div><span class="field-label">БИН структурного подразделения:</span><span class="field-value empty">—</span></div>
+        <div><span class="field-label">БИН реорганизованного лица:</span><span class="field-value empty">—</span></div>
+      </div>
+      <div class="mt-2">
+        <span class="field-label">Категория</span>
+        <div class="checkbox-group">
+          <label class="checkbox-item"><input type="checkbox"> Адвокат</label>
+          <label class="checkbox-item"><input type="checkbox"> Нотариус</label>
+          <label class="checkbox-item"><input type="checkbox"> Медиатор</label>
+          <label class="checkbox-item"><input type="checkbox"> Частный судебный исполнитель</label>
+          <label class="checkbox-item"><input type="checkbox"> Физическое лицо</label>
+          <label class="checkbox-item"><input type="checkbox"> Розничная реализация</label>
+          <label class="checkbox-item"><input type="checkbox"> Фармацевтический производитель</label>
+          <label class="checkbox-item"><input type="checkbox"> Лизингополучатель</label>
+          <label class="checkbox-item"><input type="checkbox"> Лизингодатель</label>
+          <label class="checkbox-item"><input type="checkbox"> Комитет</label>
+          <label class="checkbox-item"><input type="checkbox"> Комиссионер</label>
+          <label class="checkbox-item"><input type="checkbox"> Участник СРП</label>
+          <label class="checkbox-item"><input type="checkbox"> Доверитель</label>
+          <label class="checkbox-item"><input type="checkbox"> Розничный реализатор</label>
+          <label class="checkbox-item"><input type="checkbox"> Малая торговая точка</label>
+          <label class="checkbox-item"><input type="checkbox"> Залогодержатель/хранитель</label>
+        </div>
+      </div>
+      <div class="grid-2col mt-2">
+        <div><span class="field-label">Код страны регистрации:</span><span class="field-value">KZ</span></div>
+        <div><span class="field-label">Код страны отправки:</span><span class="field-value">KZ</span></div>
+        <div><span class="field-label">Фактический адрес отправки:</span><span class="field-value">г. Алматы, ул. Сатпаева 123</span></div>
+        <div><span class="field-label">Склад отправки:</span><span class="field-value">Склад №1</span></div>
+        <div><span class="field-label">Основной склад:</span><span class="field-value">Основной</span></div>
+      </div>
+    </div>
+
+    <!-- Раздел C (Получатель) – кратко -->
+    <div id="section-receiver" class="slide-content section-hidden">
+      <div class="slide-title"><i class="fas fa-user-check"></i> Раздел С. Получатель</div>
+      <div class="grid-2col">
+        <div><span class="field-label">Получатель:</span><span class="field-value">ТОО «Индустрия-Сервис»</span></div>
+        <div><span class="field-label">ИИН/БИН:</span><span class="field-value">987654321098</span></div>
+        <div><span class="field-label">Адрес:</span><span class="field-value">г. Нур-Султан, пр. Улы Дала 12</span></div>
+        <div><span class="field-label">Код страны:</span><span class="field-value">KZ</span></div>
+      </div>
+    </div>
+
+    <!-- Раздел D (Грузоотправитель) -->
+    <div id="section-shipper" class="slide-content section-hidden">
+      <div class="slide-title"><i class="fas fa-dolly"></i> Раздел D. Грузоотправитель</div>
+      <div class="grid-2col">
+        <div><span class="field-label">Грузоотправитель:</span><span class="field-value">ТОО «ТехноСнаб»</span></div>
+        <div><span class="field-label">ИИН/БИН:</span><span class="field-value">123456789012</span></div>
+        <div><span class="field-label">Адрес:</span><span class="field-value">г. Алматы, ул. Сатпаева 123</span></div>
+        <div><span class="field-label">Склад:</span><span class="field-value">Склад №1</span></div>
+      </div>
+    </div>
+
+    <!-- Раздел E (Перевозка) -->
+    <div id="section-transport" class="slide-content section-hidden">
+      <div class="slide-title"><i class="fas fa-truck-moving"></i> Раздел Е. Сведения по перевозке</div>
+      <div class="grid-2col">
+        <div><span class="field-label">Перевозчик:</span><span class="field-value">ТОО «ЛогистикТранс»</span></div>
+        <div><span class="field-label">Нерезидент:</span><span class="field-value empty">нет</span></div>
+        <div><span class="field-label">ИИН/БИН:</span><span class="field-value">112233445566</span></div>
+        <div><span class="field-label">Наименование перевозчика:</span><span class="field-value">ТОО «ЛогистикТранс»</span></div>
+      </div>
+      <div class="mt-2">
+        <span class="field-label">Планируемый транспорт</span>
+        <div class="grid-2col mt-1">
+          <div><span class="field-label">Автомобильный:</span><span class="field-value">KZ 123 ABC</span></div>
+          <div><span class="field-label">Гос. номер АТС:</span><span class="field-value">KZ 123 ABC</span></div>
+          <div><span class="field-label">Гос. номер прицепа:</span><span class="field-value empty">—</span></div>
+          <div><span class="field-label">Железнодорожный:</span><span class="field-value empty">—</span></div>
+          <div><span class="field-label">Номер вагона:</span><span class="field-value empty">—</span></div>
+          <div><span class="field-label">Воздушный:</span><span class="field-value empty">—</span></div>
+          <div><span class="field-label">Морской/водный:</span><span class="field-value empty">—</span></div>
+          <div><span class="field-label">Трубопровод:</span><span class="field-value empty">—</span></div>
+          <div><span class="field-label">Мультимодальный:</span><span class="field-value empty">—</span></div>
+          <div><span class="field-label">Прочие:</span><span class="field-value empty">—</span></div>
+        </div>
+        <div class="note-meta"><i class="fas fa-font"></i> Могут быть указаны только цифры и латинские буквы</div>
+      </div>
+    </div>
+
+    <!-- Раздел F (Договор) -->
+    <div id="section-contract" class="slide-content section-hidden">
+      <div class="slide-title"><i class="fas fa-file-signature"></i> Раздел F. Договор (контракт)</div>
+      <div><span class="field-label">Договор (контракт) или приложение</span></div>
+      <div class="field-value" style="background:transparent; padding-left:0; font-weight:600;">Приложение №3 к Договору поставки №1019-26 от 06.04.2026</div>
+      <div class="field-value" style="background:transparent; padding-left:0;">Прил №3 к Договору №1019-26</div>
+      <div class="field-value" style="background:transparent; padding-left:0;">06.04.2026</div>
+      <div class="checkbox-group mt-2">
+        <label class="checkbox-item"><input type="checkbox"> Без договора (контракта)</label>
+        <span class="field-label">Условия оплаты:</span><span class="field-value">безналичная оплата</span>
+        <span class="field-label">Условия поставки (ИНКОТЕРМС):</span><span class="field-value">EXW - ФРАНКО - ЗАВОД</span>
+      </div>
+      <div class="grid-2col mt-2">
+        <div><span class="field-label">Поставщика Номер:</span><span class="field-value empty">—</span></div>
+        <div><span class="field-label">Дата:</span><span class="field-value empty">—</span></div>
+        <div><span class="field-label">Получателя Номер:</span><span class="field-value empty">—</span></div>
+        <div><span class="field-label">Дата:</span><span class="field-value empty">—</span></div>
+      </div>
+    </div>
+
+    <!-- Раздел G (Товары) -->
+    <div id="section-goods" class="slide-content section-hidden">
+      <div class="slide-title"><i class="fas fa-boxes"></i> Раздел G1. Данные по товарам</div>
+      <div><span class="field-label">Код валюты:</span><span class="field-value">EUR</span></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>N</th><th>№ п/п СНТ</th><th>Наименование товара</th><th>Код ТН ВЭД</th><th>Ед. изм.</th><th>Кол-во</th><th>Ставка акциза</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td></td><td>BPZLDU11323A27LDU11323A27 - Устройство проверки герметичности газового клапана.</td><td>9026202000</td><td>796</td><td>6,000000</td><td>3,5%</td></tr>
+            <tr><td>2</td><td></td><td>SS5454-D317-A100 S0N70 254B20 ПРИВОД 3А.</td><td>8501101009</td><td>796</td><td>2,000000</td><td></td></tr>
+            <tr><td>3</td><td></td><td>6ES7954-8L03-0AA0 SIMATIC S7, memory card.</td><td>8523511000</td><td>796</td><td>1,000000</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="flex-between mt-2"><span class="field-label">Всего:</span><span class="field-value" style="font-size:1.2rem;">2 500,20 EUR</span></div>
+    </div>
+
+    <!-- Раздел К (Данные о грузе) + прочее  -->
+    <div id="section-cargo" class="slide-content section-hidden">
+      <div class="slide-title"><i class="fas fa-weight"></i> Раздел К. Данные о грузе</div>
+      <div class="grid-2col">
+        <div><span class="field-label">Вес брутто (кг):</span><span class="field-value">124,5</span></div>
+        <div><span class="field-label">Вес нетто (кг):</span><span class="field-value">112,0</span></div>
+        <div><span class="field-label">Количество мест:</span><span class="field-value">3</span></div>
+        <div><span class="field-label">Объём (м³):</span><span class="field-value">0,75</span></div>
+      </div>
+    </div>
+
+    <!-- Прочее -->
+    <div id="section-other" class="slide-content section-hidden">
+      <div class="slide-title"><i class="fas fa-ellipsis-h"></i> Прочие сведения</div>
+      <div class="grid-2col">
+        <div><span class="field-label">Отметки ОГД:</span><span class="field-value empty">—</span></div>
+        <div><span class="field-label">Справочные сведения:</span><span class="field-value empty">—</span></div>
+        <div><span class="field-label">Отпуск товара:</span><span class="field-value empty">не указан</span></div>
+        <div><span class="field-label">Приемка товара:</span><span class="field-value empty">не указана</span></div>
+      </div>
+      <div class="note-meta mt-2"><i class="fas fa-info-circle"></i> Документ проведен. ЭСФ отсутствует.</div>
+    </div>
+  </div>
+  <!-- footer -->
+  <div style="margin-top: 18px; font-size:0.8rem; color:#59748f; display: flex; gap: 18px; flex-wrap: wrap; border-top:1px solid #dae3ef; padding-top: 14px;">
+    <span><i class="far fa-calendar-alt"></i> Дата оформления: 14.09.2026</span>
+    <span><i class="far fa-file-pdf"></i> Номер СНТ: 00НФ-И-00000000000000000000000086</span>
+    <span><i class="fas fa-check-circle" style="color:#1d7a3e;"></i> Статус: Проведен</span>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const navBtns = document.querySelectorAll('.nav-btn');
+    const sections = {
+      general: document.getElementById('section-general'),
+      supplier: document.getElementById('section-supplier'),
+      receiver: document.getElementById('section-receiver'),
+      shipper: document.getElementById('section-shipper'),
+      transport: document.getElementById('section-transport'),
+      contract: document.getElementById('section-contract'),
+      goods: document.getElementById('section-goods'),
+      cargo: document.getElementById('section-cargo'),
+      other: document.getElementById('section-other')
+    };
+
+    function showSection(sectionId) {
+      // скрыть все
+      Object.values(sections).forEach(el => el.classList.add('section-hidden'));
+      // показать нужный
+      if (sections[sectionId]) {
+        sections[sectionId].classList.remove('section-hidden');
+      }
+      // обновить активную кнопку
+      navBtns.forEach(btn => btn.classList.remove('active'));
+      const activeBtn = Array.from(navBtns).find(btn => btn.dataset.section === sectionId);
+      if (activeBtn) activeBtn.classList.add('active');
+    }
+
+    // событие для кнопок
+    navBtns.forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        const section = this.dataset.section;
+        if (section) showSection(section);
+      });
+    });
+
+    // по умолчанию общий (уже active)
+    // но на всякий случай
+    showSection('general');
+  })();
+</script>
+
+</body>
+</html>
